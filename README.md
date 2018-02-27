@@ -26,6 +26,8 @@ High value targets:
 
 ## 1. Domain object DACL privilege escalation
 
+A privilege escalation is possible from the "Exchange Windows permissions" (EWP) security group to compromise the entire prepared Active Directory domain.
+
 DISCLAIMER: This has been responsibly disclosed to MSRC in October 2017 and after a few back and forth emails, they decided it was working as intended and would not fix it.
 
 * Description of the issue
@@ -35,14 +37,16 @@ This happens during the "Setup /PrepareDomain" command.
 
 The two following ACEs on the domain object are missing the INHERIT_ONLY_ACE bit in the Flags field:
 
-Account	ACE type	Inheritance	Permissions	On property/ Applies to	Comments
-Exchange Windows Permissions	Allow ACE	All	WriteDACL	/ user	
-Exchange Windows Permissions	Allow ACE	All	WriteDACL	/ inetOrgPerson	
+
+| Account | ACE type | Inheritance | Permissions | On property/ Applies to | Comments |
+| ------- | -------- | ----------- | ----------- | ----------------------- | -------- |
+| Exchange Windows Permissions | Allow ACE | All | WriteDACL | / user | |
+| Exchange Windows Permissions | Allow ACE | All | WriteDACL | / inetOrgPerson | |
 
 
 * Technical consequence
 
-The Allow permission to WriteDACL is granted to the Trustee on the domain object itself and not only its user/inetOrgPerson descendants, effectively giving complete control on it to anyone with the Exchange Windows Permissions SID in its token.
+The Allow permission to WriteDACL is granted to the Trustee on the domain object itself and not only on its user/inetOrgPerson descendants, effectively giving complete control to anyone with the Exchange Windows Permissions SID in its token.
 
 * Expected behavior
 
@@ -52,7 +56,7 @@ This is also incoherent with the other INHERITED_OBJECT_TYPE ACEs on the domain 
 
 * Security Consequence
 
-A privilege escalation is possible from the "Exchange Windows permissions" (EWP) security group to compromise the entire prepared Active Directory domain. Just set the Ds-Replication-Get-Changes-All extended right on the domain object. This is enough to use a DRSUAPI replication tool ala DCSync to get all the domain secrets.
+A privilege escalation is possible from the "Exchange Windows permissions" (EWP) security group to compromise the entire prepared Active Directory domain. Just set the Ds-Replication-Get-Changes-All extended right on the domain object. This is enough to use a DRSUAPI replication tool ala DCSync to get all the domain secrets (Kerberos keys, hashes, etc.).
 
 You can control the SID of the EWP group from "Organization management", from "Account operators" or from any Exchange server.
 Interestingly, the RBAC system is proxified through EWP so a privilege escalation is possible from the "Active Directory Permissions" RBAC role to compromise the entire prepared Active Directory domain.
