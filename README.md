@@ -35,13 +35,34 @@ DISCLAIMER: This has been responsibly disclosed to MSRC in October 2017 and afte
 When preparing Exchange 2010/2013/2016 installation in shared permissions (default) or RBAC split permissions, some ACEs are positioned on the domain object for the **Exchange Windows Permissions** security group.
 This happens during the "Setup /PrepareDomain" command.
 
-The two following ACEs on the domain object are missing the INHERIT_ONLY_ACE bit in the Flags field:
+Two ACEs on the domain object are missing the INHERIT_ONLY_ACE bit in the Flags field. 
+
+This is how they are, in SDDL format :
+
+```
+(OA;CI;DTWD;;4828cc14-1437-45bc-9b07-ad6f015e5f28;<SID of EWP>)
+(OA;CI;DTWD;;bf967aba-0de6-11d0-a285-00aa003049e2;<SID of EWP>)
+```
+
+Notice the missing 'IO' (inherit_only) flag. As a matter of fact, INHERITED_OBJECT_TYPE ACE effectively apply to the object itself when the inherit_only flag is not set.
+
+This is how they are documented on Technet, so it is definitely missing that information:
 
 
 | Account | ACE type | Inheritance | Permissions | On property/ Applies to | Comments |
 | ------- | -------- | ----------- | ----------- | ----------------------- | -------- |
 | Exchange Windows Permissions | Allow ACE | All | WriteDACL | / user | |
 | Exchange Windows Permissions | Allow ACE | All | WriteDACL | / inetOrgPerson | |
+
+
+
+And finally, this is how they appear in the GUI (DSA console), which is also missing that information:
+
+![DSA ACE view](DSA_ACE_view.png "DSA ACE view")
+
+
+Coincidentally, INHERITED_OBJECT_TYPE ACE created with DSA console always have the IO flag. Creating a 'self and specific descendents', INHERITED_OBJECT_TYPE ACE is only possible programmatically and only viewable programmatically.
+
 
 
 * Technical consequence
