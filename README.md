@@ -28,7 +28,7 @@ High value targets:
 
 A privilege escalation is possible from the **Exchange Windows permissions** (EWP) security group to compromise the entire prepared Active Directory domain.
 
-DISCLAIMER: This has been responsibly disclosed to MSRC in October 2017 and after a few back and forth emails, they decided it was working as intended and would not fix it.
+DISCLAIMER: This issue has been responsibly disclosed to MSRC in October 2017 and after a few back and forth emails, they decided it was working as intended and would not fix it.
 
 * Description of the issue
 
@@ -37,7 +37,7 @@ This happens during the "Setup /PrepareDomain" command.
 
 Two ACEs on the domain object are missing the INHERIT_ONLY_ACE bit in the Flags field. 
 
-This is how they are, in SDDL format :
+This is their SDDL representation :
 
 ```
 (OA;CI;DTWD;;4828cc14-1437-45bc-9b07-ad6f015e5f28;<SID of EWP>)
@@ -56,13 +56,16 @@ This is how they are documented on Technet, so it is definitely missing that inf
 
 
 
-And finally, this is how they appear in the GUI (DSA console), which is also missing that information:
+This is how they appear in the GUI (DSA console), which is also missing that information:
 
 ![DSA ACE view](DSA_ACE_view.png "DSA ACE view")
 
+The issue can be confirmed in the "Effective Access" tab of the domain object when specifying EWP.
+
+![DSA effective access](DSA_effective_access.png "DSA effective access")
+
 
 Coincidentally, INHERITED_OBJECT_TYPE ACE created with DSA console always have the IO flag. Creating a 'self and specific descendents', INHERITED_OBJECT_TYPE ACE is only possible programmatically and only viewable programmatically.
-
 
 
 * Technical consequence
