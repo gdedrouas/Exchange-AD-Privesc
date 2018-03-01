@@ -1,6 +1,6 @@
 # Exchange-AD-Privesc
 
-This repository will provide a few techniques and scripts regarding the impact of Microsoft Exchange deployment on Active Directory security.
+This repository provides a few techniques and scripts regarding the impact of Microsoft Exchange deployment on Active Directory security. This is a side project of [AD-Control-Paths](https://github.com/ANSSI-FR/AD-control-paths), an AD permissions auditing project to which I recently added some Exchange-related modules.
 
 ## General considerations
 
@@ -9,9 +9,9 @@ They are also more difficult to migrate and business critical, so organizations 
 
 Exchange deployment on an Active Directory domain is an interesting case. Many attributes and classes are added to the schema, security groups are created and DACL on some AD objects are heavily modified. 
 
-Basically you can select among 3 permissions models:
+Basically, you can select among 3 permissions models:
 
-* RBAC Split (most common)
+* RBAC Split (recommended and most commonly deployed)
 * Shared permissions (default)
 * AD Split
 
@@ -32,7 +32,7 @@ DISCLAIMER: This issue has been responsibly disclosed to MSRC in October 2017 an
 
 * Description of the issue
 
-When preparing Exchange 2010/2013/2016 installation in shared permissions (default) or RBAC split permissions, some ACEs are positioned on the domain object for the **Exchange Windows Permissions** security group.
+When preparing Exchange 2010/2013/2016 installation in Shared permissions (default) or RBAC split permissions, some ACEs are positioned on the domain object for the **Exchange Windows Permissions** security group.
 This happens during the "Setup /PrepareDomain" command.
 
 Two ACEs on the domain object are missing the INHERIT_ONLY_ACE bit in the Flags field. 
@@ -75,7 +75,7 @@ The Allow permission to WriteDACL is granted to the Trustee on the domain object
 * Expected behavior
 
 The Allow permission to WriteDACL should only be given on child objects matching the INHERITED_OBJECT_TYPE Guid. It is supposed to only apply to user or inetOrgPerson classes.
-This is also incoherent with the other INHERITED_OBJECT_TYPE ACEs on the domain object for the same Trustee, which all have the INHERIT_ONLY_ACE bit in the Flags field.
+This is not consistent with the other INHERITED_OBJECT_TYPE ACEs on the domain object for the same Trustee, which all have the INHERIT_ONLY_ACE bit in the Flags field.
 
 
 * Security Consequence
