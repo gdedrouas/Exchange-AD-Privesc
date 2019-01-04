@@ -11,7 +11,7 @@ This happens during the "Setup /PrepareDomain" command.
 
 Two ACEs on the domain object are missing the INHERIT_ONLY_ACE bit in the Flags field. 
 
-This is their SDDL representation :
+This is their SDDL representation:
 
 ```
 (OA;CI;DTWD;;4828cc14-1437-45bc-9b07-ad6f015e5f28;<SID of EWP>)

