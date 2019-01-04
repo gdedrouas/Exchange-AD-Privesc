@@ -29,6 +29,13 @@ Exchange Windows Permissions	Allow ACE	All	WriteProp	ManagedBy /
 Exchange Windows Permissions	Allow ACE	All	WriteProp	Member /
 Exchange Trusted Subsystem	Allow ACE	All	WriteDACL	/ Group
 
+| Account | ACE type | Inheritance | Permissions | On property/ Applies to | Comments |
+| ------- | -------- | ----------- | ----------- | ----------------------- | -------- |
+| Exchange Windows Permissions | Allow ACE | All | WriteProp | ManagedBy / | |
+| Exchange Windows Permissions | Allow ACE | All | WriteProp | Member / | |
+| Exchange Trusted Subsystem | Allow ACE | All | WriteDACL | / Group | |
+
+
 * Technical consequence
 
 Any member of Exchange Windows Permissions can add members to DNSAdmins. 
