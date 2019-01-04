@@ -8,7 +8,7 @@ This repository provides a few techniques and scripts regarding the impact of Mi
 2. [DNSAdmins group DACL privilege escalation](DNSAdmins/DNSAdmins.md)
 
 
-## 0. General considerations
+## General considerations
 
 For pentesters looking to take control of an AD domain, Exchange is a valid intermediary target. The servers are much less secured than domain controllers by default and the control groups are distinct in the usual permissions models, which provides numerous alternative targets.
 They are also more difficult to migrate and business critical, so organizations often adopt a slower migration process for Exchange than for AD and do not specifically harden the servers.
