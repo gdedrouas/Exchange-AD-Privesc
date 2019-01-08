@@ -56,6 +56,9 @@ If(!$Fix -and $vulnerable) {
   }
   
 If($Fix -and $vulnerable) {
+  "Backing up domain object DACL in domainObjectDACL.txt"
+  $domainObjectAcl.Sddl | out-file "domainObjectDACL.txt"
+
   Write-Host "Setting the Inherit_Only flag in faulty ACE on domain object DACL"
   $inheritanceType = [System.DirectoryServices.ActiveDirectorySecurityInheritance]"Descendents"
   $ace0 = new-object System.DirectoryServices.ActiveDirectoryAccessRule $faultyACE[0].IdentityReference, `
@@ -69,10 +72,9 @@ If($Fix -and $vulnerable) {
   $domainObjectAcl.RemoveAccessRule($faultyACE[1])
   $domainObjectAcl.AddAccessRule($ace0)
   $domainObjectAcl.AddAccessRule($ace1)
-  "Backing up domain object DACL in domainObjectDACL.txt"
-  $domainObjectAcl.Sddl | out-file "domainObjectDACL.txt"
+
   Try {
-    Set-Acl -aclobject $domainObjectAcl "ad:$primaryDN"
+    Set-Acl -aclobject $domainObjectAcl "ad:$primaryDN" -ErrorAction Stop
   }
   Catch {
     Write-Host "An error occurred:"

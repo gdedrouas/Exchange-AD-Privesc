@@ -4,28 +4,30 @@ A privilege escalation is possible from the **Exchange Windows permissions** (EW
 and from the **Exchange Trusted Subsystem** security groups to control the DNSAdmins group and then compromise the entire prepared Active Directory domain.
 This second part was described in [this work from Shay Ber](https://medium.com/@esnesenon/feature-not-bug-dnsadmin-to-dc-compromise-in-one-line-a0f779b8dc83) in 2017
 
+As a matter of fact, any security group inheriting its DACL from the Domain Object can be controlled in this way. The ones giving a privilege escalation to Domain Admins are usually protected by AdminSDHolder, though the DNSAdmins group is not.
 
 DISCLAIMER: This issue has been responsibly disclosed to MSRC in November 2018 and after a few back and forth emails, they closed the case.
 Basically, they could not reproduce the issue in their testing environments. 
-However, the DACL of the incriminated object on their side appears to be quite different from the DACL that I observed in several live production AD domains: MSRC side DACL has a few *Deny* ACEs explicitely positioned for the incriminated Exchange security groups, where production side has only *Allow* ACEs.
+However, the DACL of the incriminated object on their side appears to be quite different from the DACL that I observed in several live production AD domains: MSRC side DACL has a few *Deny* ACEs explicitely positioned for the incriminated Exchange security groups, where production side has only *Allow* ACEs. Not to mention *Deny* ACEs are bad practice for a case where *Allow* ACEs should just be removed.
 
 
 From there, I can only speculate that either they have an unreleased fix on their testing environments, or their path of Exchange deployment on AD is different
-from what is commonly observed on live domains, which are upgraded and not redeployed on CU releases. If the aformentionned *Deny* ACEs are positioned on your environment, it is probably *NOT* vulnerable.
+from what is commonly observed on live domains, which are upgraded and not redeployed on CU releases. If the aformentioned *Deny* ACEs are set on your environment, it is probably *NOT* vulnerable.
 
 
 * Description of the issue
 
 In up-to-date deployments of Exchange 2016 in Shared permissions (default) or RBAC split permissions, three controlling ACEs are positioned on the "CN=DNSAdmins,CN=Users" group for the **Exchange Windows Permissions** 
-and for the **Exchange Trusted Subsystem** security groups.
+and for the **Exchange Trusted Subsystem** security groups. They are inherited from the Domain Object, two of them are documented, the ETS one is not.
 
-These ACE are probably positioned during an update or a particular CU install. I have been confirmed they exist on other organizations production environments. This is their SDDL representation:
+This undocumented ACE is probably positioned during an update or a particular CU install. I have been confirmed it exists on other organizations production environments. This is their SDDL representation:
 
 ```
 (OA;CIID;WP;bf9679c0-0de6-11d0-a285-00aa003049e2;;<SID of EWP>)
 (OA;CIID;WP;0296c120-40da-11d1-a9c0-0000f80367c1;;<SID of EWP>)
 (OA;CIID;WD;;bf967a9c-0de6-11d0-a285-00aa003049e2;<SID of ETS>)
 ```
+
 Which translates into:
 
 | Account | ACE type | Inheritance | Permissions | On property/ Applies to | Comments |
@@ -84,7 +86,12 @@ dnscmd test_domain_controller /config /serverlevelplugindll \\NetworkPath\to\dll
 
 * Workaround fix
 
-Manually with LDP: bind as a Domain Admin account with the usual precautions, as you will change the DNSadmins group DACL.
+Use the Fix-DNSAdmins-DACL.ps1 Powershell script in this repository. Read it, test it, use it at your own risk.
+
+By default, it checks the three faulty ACEs, this can be done by any user. Use with -Fix switch with Domain Admins privileges to remove them.
+
+
+Alternatively, it can be done manually with LDP: bind as a Domain Admin account with the usual precautions, as you will change the DNSadmins group DACL.
 
 Backup the DACL: 
 
@@ -94,5 +101,5 @@ Backup the DACL:
 
 Locate the "CN=DNSAdmins,CN=Users,DC=..." security group. Disable ACE inheritance and choose to copy existing ACEs. Locate and delete the 3 faulty ACE in the DACL: you can sort by Trustee to see Exchange Windows Permissions and Exchange Trusted Subsystem.
 
-TODO: powershell fix script.
+
 
