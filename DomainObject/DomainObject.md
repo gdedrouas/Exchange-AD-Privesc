@@ -7,7 +7,7 @@ DISCLAIMER: This issue has been responsibly disclosed to MSRC in October 2017 an
 * Description of the issue
 
 When preparing Exchange 2010/2013/2016 installation in Shared permissions (default) or RBAC split permissions, some ACEs are positioned on the domain object for the **Exchange Windows Permissions** security group.
-This happens during the "Setup /PrepareDomain" command.
+This happens during the "Setup /PrepareAD" command.
 
 Two ACEs on the domain object are missing the INHERIT_ONLY_ACE bit in the Flags field. 
 
@@ -103,7 +103,8 @@ Add-ADPermission "DC=test,DC=local" -User $id.Name -ExtendedRights Ds-Replicatio
 
 Use the Fix-DomainObjectDACL.ps1 Powershell script in this repository. Read it, test it, use it at your own risk.
 
-By default, it checks the two faulty ACE, this can be done by any user. Use with -Fix switch with Domain Admins privileges to set the inherit_only missing flags.
+By default, it checks the two faulty ACE, this can be done by any user. Use with -Fix switch with Domain Admins privileges to set the InheritOnly missing flags. 
+Use with -Restore switch to restore the two previously fixed ACEs to their original, *vulnerable* state. An SDDL backup is made everytime the script is run. 
 
 
 Another option is doing it manually with LDP. Bind as a Domain Admin account with the usual precautions, as you will change the domain object DACL.
