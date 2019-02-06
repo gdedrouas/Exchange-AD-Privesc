@@ -85,11 +85,13 @@ dnscmd test_domain_controller /config /serverlevelplugindll \\NetworkPath\to\dll
 ```
 
 * Workaround fix
+An elegant way of fixing this problem is including the DNSAdmins group into an AdminSDHolder-protected group.
 
-Use the Fix-DNSAdmins-DACL.ps1 Powershell script in this repository. Read it, test it, use it at your own risk.
+Alternatively, use the Fix-DNSAdmins-DACL.ps1 Powershell script in this repository. Read it, test it, use it at your own risk.
 
-By default, it checks the three faulty ACEs, this can be done by any user. Use with -Fix switch with Domain Admins privileges to remove them.
+By default, it checks the three faulty ACEs, this can be done by any user. Use with -Fix switch with Domain Admins privileges will break DACL inheritance on this group and remove the three ACEs.
 
+To revert, simply reenable DACL inheritance.
 
 Alternatively, it can be done manually with LDP: bind as a Domain Admin account with the usual precautions, as you will change the DNSadmins group DACL.
 
@@ -100,6 +102,5 @@ Backup the DACL:
 ```
 
 Locate the "CN=DNSAdmins,CN=Users,DC=..." security group. Disable ACE inheritance and choose to copy existing ACEs. Locate and delete the 3 faulty ACE in the DACL: you can sort by Trustee to see Exchange Windows Permissions and Exchange Trusted Subsystem.
-
 
 

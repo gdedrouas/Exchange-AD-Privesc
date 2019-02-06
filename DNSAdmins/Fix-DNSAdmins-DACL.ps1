@@ -133,6 +133,6 @@ If($Fix -and $vulnerable) {
     Write-Host $_.Exception.Message
     Break
   }
-  Write-Host "Done. Relaunch script to check."
+  Write-Host "Done. Relaunch script to check. Restore DACL inheritance to revert."
   
 } 
