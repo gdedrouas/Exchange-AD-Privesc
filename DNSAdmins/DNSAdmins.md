@@ -6,7 +6,10 @@ This second part was described in [this work from Shay Ber](https://medium.com/@
 
 As a matter of fact, any security group inheriting its DACL from the Domain Object can be controlled in this way. The ones giving a privilege escalation to Domain Admins are usually protected by AdminSDHolder, though the DNSAdmins group is not.
 
-DISCLAIMER: This issue has been responsibly disclosed to MSRC in November 2018 and after a few back and forth emails, they closed the case.
+~~DISCLAIMER: This issue has been responsibly disclosed to MSRC in November 2018 and after a few back and forth emails, they closed the case.~~
+
+This issue is in the [June 2019 Quarterly Exchange update](https://techcommunity.microsoft.com/t5/Exchange-Team-Blog/Released-June-2019-Quarterly-Exchange-Updates/ba-p/698398).
+
 Basically, they could not reproduce the issue in their testing environments. 
 However, the DACL of the incriminated object on their side appears to be quite different from the DACL that I observed in several live production AD domains: MSRC side DACL has a few *Deny* ACEs explicitely positioned for the incriminated Exchange security groups, where production side has only *Allow* ACEs. Not to mention *Deny* ACEs are bad practice for a case where *Allow* ACEs should just be removed.
 
@@ -84,7 +87,11 @@ Add-ADGroupMember -Identity "DNSAdmins" -Members $user
 dnscmd test_domain_controller /config /serverlevelplugindll \\NetworkPath\to\dll
 ```
 
-* Workaround fix
+* Microsoft has published a fix for this issue
+
+It involves running setup.exe /PrepareAD to deny or remove those ACEs. See https://techcommunity.microsoft.com/t5/Exchange-Team-Blog/Released-June-2019-Quarterly-Exchange-Updates/ba-p/698398
+
+* Workaround fix (now unnecessary, see previous part)
 An elegant way of fixing this problem is including the DNSAdmins group into an AdminSDHolder-protected group.
 
 Alternatively, use the Fix-DNSAdmins-DACL.ps1 Powershell script in this repository. Read it, test it, use it at your own risk.

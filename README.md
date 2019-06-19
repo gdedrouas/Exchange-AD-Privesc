@@ -6,6 +6,7 @@ This repository provides a few techniques and scripts regarding the impact of Mi
 0. General considerations
 1. [Domain object DACL privilege escalation](DomainObject/DomainObject.md)
 2. [DNSAdmins group DACL privilege escalation](DNSAdmins/DNSAdmins.md)
+3. [Public-Information property set includes SPN, allows kerberoasting](Write-Public-Information/Write-Public-Information.md)
 
 
 ## General considerations
