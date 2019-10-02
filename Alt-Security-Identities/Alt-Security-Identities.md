@@ -5,10 +5,10 @@ and from the **Exchange Trusted Subsystem** security groups to authenticate as a
 
 This issue has been responsibly disclosed to MSRC and received a "won't fix" response. The justification is that Exchange deployments should be done in Split Permissions mode otherwise privileges escalation to Domain Admins is to be expected. However, risk assessment would justify the production of a fix:
 
- ** Most MS Exchange deployments are not Split but RBAC, putting MS customers at risk of AD compromise ;
- ** A lot of efforts have already been done to prevent Exchange to AD privileges escalations, some of which you can read in this very repository ;
- ** A previous vulnerability of the same type got the fix I suggested when infosec bloggers published some AD compromission chains including it ;
- ** The fix is quick and low-impact.
+  * Most MS Exchange deployments are not Split but RBAC, putting MS customers at risk of AD compromise ;
+  * A lot of efforts have already been done to prevent Exchange to AD privileges escalations, some of which you can read in this very repository ;
+  * A previous vulnerability of the same type got the fix I suggested when infosec bloggers published some AD compromission chains including it ;
+  * The fix is quick and low-impact.
 
 [See the June 2019 quarterly updates.](https://techcommunity.microsoft.com/t5/Exchange-Team-Blog/Released-June-2019-Quarterly-Exchange-Updates/ba-p/698398)
 
