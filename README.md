@@ -7,6 +7,7 @@ This repository provides a few techniques and scripts regarding the impact of Mi
 1. [Domain object DACL privilege escalation](DomainObject/DomainObject.md)
 2. [DNSAdmins group DACL privilege escalation](DNSAdmins/DNSAdmins.md)
 3. [Public-Information property set includes SPN, allows kerberoasting](Write-Public-Information/Write-Public-Information.md)
+4. [Public-Information property set includes Alt-Security-Identities, allows x509 certificate mapping to privileged users](Alt-Security-Identities/Alt-Security-Identities.md)
 
 
 ## General considerations
