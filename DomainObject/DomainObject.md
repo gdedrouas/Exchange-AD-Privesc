@@ -3,6 +3,11 @@
 A privilege escalation is possible from the **Exchange Windows permissions** (EWP) security group to compromise the entire prepared Active Directory domain.
 
 DISCLAIMER: This issue has been responsibly disclosed to MSRC in October 2017 and after a few back and forth emails, they decided it was working as intended and would not fix it.
+It was finally [addressed by Microsoft in April 2019](https://support.microsoft.com/en-us/help/4490059/using-shared-permissions-model-to-run-exchange-server), with the following cumulative updates (`/PrepareAD` and `/PrepareDomain` switches are required during installation):
+- Exchange Server 2019 – Cumulative Update 1
+- Exchange Server 2016 – Cumulative Update 12
+- Exchange Server 2013 – Cumulative Update 22
+
 
 * Description of the issue
 
